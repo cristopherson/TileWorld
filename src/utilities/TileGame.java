@@ -16,6 +16,11 @@ package utilities;
  * @author Cay Horstmann
  */
 
+import info.gridworld.actor.Actor;
+import info.gridworld.actor.Bug;
+import info.gridworld.actor.Critter;
+import info.gridworld.actor.Flower;
+import info.gridworld.actor.Rock;
 import info.gridworld.grid.Grid;
 import info.gridworld.grid.Location;
 import info.gridworld.world.World;
@@ -23,55 +28,37 @@ import info.gridworld.world.World;
 import java.awt.Color;
 import java.util.Random;
 
-public class TileGame extends World<Tile> {
+public class TileGame extends World<Actor> {
 	public TileGame() {
-		Color colors[] = {Color.BLUE, Color.GRAY, Color.BLACK};
-		TILE_TYPES types[] = {TILE_TYPES.TILE, TILE_TYPES.OBSTACLE, TILE_TYPES.HOLE};
-		int num_available_spaces = 99;
+		Actor actors[] = {new Flower(Color.RED), new Critter(), new Rock()};
+		int num_available_spaces = 98;
 		int amount;
 		
 		for (int i = 0; i< 3; i++) {
-			amount = (int)(new Random().nextDouble() * (num_available_spaces / 6.0));
+			amount = (int)(new Random().nextDouble() * (num_available_spaces / 6.0)) + 1;
 			num_available_spaces -= amount;
 			for (int j = 0; j < amount; j++)
-				add(getRandomEmptyLocation(), new Tile(colors[i], types[i]));
+				add(getRandomEmptyLocation(), actors[i]);
 		}
-		
-		first = true;
 	}
-
-	public boolean locationClicked(Location loc) {
-		Grid<Tile> gr = getGrid();
-		Tile t = gr.get(loc);
+	
+	public boolean locationClicked(Location location) {
+		Grid<Actor> grid = getGrid();
+		Actor actor = grid.get(location);
 		
-				
-		if (t != null) {
-			t.flip();
-			if (first) {
-				if (firstTile != null) {
-					firstTile.flip();
-					secondTile.flip();
-				}
-				firstTile = t;
-				setMessage("Click on the second tile");
-				first = false;
-			} else {
-				if (firstTile.getColor().equals(t.getColor())) {
-					firstTile = secondTile = null;
-				} else
-					secondTile = t;
-				setMessage("Click on the first tile");
-				first = true;
+		if (actor == null) {
+			add(location, new Bug());
+		} else {			
+			if (actor.getClass() == Rock.class) {
+				setMessage("This is a rock" );
 			}
-		} else {
-			add(loc, new Tile(Color.RED, TILE_TYPES.AGENT));
 		}
 		return true;
 	}
 
-	public boolean keyPressed(String description, Location loc) {
+	public boolean keyPressed(String description, Location location) {
 		if (description.equals("SPACE"))
-			return locationClicked(loc);
+			return locationClicked(location);
 		else
 			return false;
 	}
@@ -79,8 +66,8 @@ public class TileGame extends World<Tile> {
 	public static void main(String[] args) {
 		new TileGame().show();
 	}
-
-	private Tile firstTile;
-	private Tile secondTile;
-	private boolean first;
+	
+	public void step() {
+		setMessage("This is a random location " + getRandomEmptyLocation());
+	}
 }
