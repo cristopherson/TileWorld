@@ -28,15 +28,16 @@ public class Environment extends Agent{
 			public void action() {
 				ACLMessage msgRx = receive();
 				if (msgRx != null) {
-					System.out.println(msgRx);
-					ACLMessage msgTx = msgRx.createReply();
-					msgTx.setContent("Hello!");
-					send(msgTx);
+					if (msgRx.getPerformative() == ACLMessage.PROPOSE) {
+						System.out.println(msgRx);
+						ACLMessage msgTx = msgRx.createReply();
+						msgTx.setContent("Hello! " + msgRx.getSender().getName());
+						send(msgTx);
+					}
 				} else {
 					block();
 				}
 			}
 		});
 	}
-
 }
