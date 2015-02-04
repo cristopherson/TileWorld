@@ -5,7 +5,7 @@ import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
-public class BugAgent extends Agent {
+public class TileAgent extends Agent {
 	/**
 	 * 
 	 */
