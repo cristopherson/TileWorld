@@ -28,8 +28,13 @@ import info.gridworld.world.World;
 import java.awt.Color;
 import java.util.Random;
 
+import agents.BugAgent;
+import agents.Environment;
+
 public class TileGame extends World<Actor> {
-	public TileGame() {
+	private Environment env;
+	public TileGame(Environment env) {
+		this.env = env;
 		Actor actors[] = {new Flower(Color.RED), new Critter(), new Rock()};
 		int num_available_spaces = 98;
 		int amount;
@@ -64,10 +69,12 @@ public class TileGame extends World<Actor> {
 	}
 
 	public static void main(String[] args) {
-		new TileGame().show();
+		//new TileGame(null).show();
 	}
 	
 	public void step() {
-		setMessage("This is a random location " + getRandomEmptyLocation());
+		for (BugAgent agent :env.getMap().values())
+			agent.act();
+		
 	}
 }

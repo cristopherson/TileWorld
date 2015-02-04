@@ -5,7 +5,6 @@ import info.gridworld.actor.Bug;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import utilities.BugAgent;
 import utilities.TileGame;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -21,8 +20,8 @@ public class Environment extends Agent{
 	private HashMap <String, BugAgent>map;
 	
 	public Environment() {
-		map = new HashMap<String, BugAgent>();
-		tileGame = new TileGame();
+		setMap(new HashMap<String, BugAgent>());
+		tileGame = new TileGame(this);
 		tileGame.show();
 	}
 
@@ -46,7 +45,7 @@ public class Environment extends Agent{
 						System.out.println(msgRx);
 						BugAgent bugAgent = new BugAgent(msgRx.getSender().getLocalName().toString(), (Environment)myAgent);
 												
-						map.put(bugAgent.getAgentName(), bugAgent);
+						getMap().put(bugAgent.getAgentName(), bugAgent);
 						tileGame.add(tileGame.getRandomEmptyLocation(), bugAgent);
 						
 						ACLMessage msgTx = msgRx.createReply();
@@ -60,5 +59,13 @@ public class Environment extends Agent{
 				}
 			}
 		});
+	}
+
+	public HashMap <String, BugAgent> getMap() {
+		return map;
+	}
+
+	public void setMap(HashMap <String, BugAgent> map) {
+		this.map = map;
 	}
 }
