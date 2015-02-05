@@ -1,20 +1,16 @@
 package behavior;
 
-import jade.core.behaviours.SimpleBehaviour;
+import java.util.Random;
+
 import jade.lang.acl.ACLMessage;
 
-public class PlayingBehavior extends SimpleBehaviour {
+public class LazyPlayingBehavior extends PlayingBehavior {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected boolean gameOver = false;
-	protected PlayingStates state;
-
-	public PlayingBehavior() {
-		state = PlayingStates.IDLE;
-	}
+	private double laziness = 0.5; 
 
 	@Override
 	public void action() {
@@ -24,6 +20,16 @@ public class PlayingBehavior extends SimpleBehaviour {
 			block();
 			return;
 		} else if (msgRx.getPerformative() == ACLMessage.CFP) {
+			if(new Random().nextDouble() < laziness) {
+				state = PlayingStates.IDLE;
+				ACLMessage msgTx = msgRx.createReply();
+				msgTx.setContent("");
+				msgTx.setPerformative(ACLMessage.PROPOSE);
+				myAgent.send(msgTx);
+				System.out.println("Taking a rest");
+				return;
+			}
+			
 			if (state == PlayingStates.IDLE) {
 				state = PlayingStates.EXPLORING;
 				ACLMessage msgTx = msgRx.createReply();
@@ -35,19 +41,19 @@ public class PlayingBehavior extends SimpleBehaviour {
 				ACLMessage msgTx = msgRx.createReply();
 				msgTx.setContent("random");
 				msgTx.setPerformative(ACLMessage.PROPOSE);
-				myAgent.send(msgTx);				
+				myAgent.send(msgTx);
 			} else if (state == PlayingStates.PLANNING) {
 				state = PlayingStates.FILLING_HOLES;
 				ACLMessage msgTx = msgRx.createReply();
 				msgTx.setContent("random");
 				msgTx.setPerformative(ACLMessage.PROPOSE);
-				myAgent.send(msgTx);				
+				myAgent.send(msgTx);
 			} else if (state == PlayingStates.FILLING_HOLES) {
 				state = PlayingStates.IDLE;
 				ACLMessage msgTx = msgRx.createReply();
 				msgTx.setContent("random");
 				msgTx.setPerformative(ACLMessage.PROPOSE);
-				myAgent.send(msgTx);						
+				myAgent.send(msgTx);
 			}
 		} else if (msgRx.getPerformative() == ACLMessage.FAILURE) {
 			String content = msgRx.getContent();
@@ -64,20 +70,8 @@ public class PlayingBehavior extends SimpleBehaviour {
 
 			if (action.equals("moveto")) {
 				int direction = Integer.parseInt(content.split(":")[1]);
-				System.out.println("Direction (" + direction + ") succeded");				
+				System.out.println("Direction (" + direction + ") succeded");
 			}
 		}
-	}
-
-	public int onEnd() {
-		if (!gameOver)
-			return TileAgentStates.PLAYING_EVENT;
-		return TileAgentStates.GAME_OVER_EVENT;
-	}
-
-	@Override
-	public boolean done() {
-		// TODO Auto-generated method stub
-		return gameOver;
 	}
 }

@@ -111,7 +111,8 @@ public class Environment extends Agent {
 		}
 
 		adjacentLocation = location.getAdjacentLocation(action);
-		if (adjacentLocation != null && isValid(action, adjacentLocation)) {
+
+		if (adjacentLocation != null && tileGame.getGrid().isValid(adjacentLocation)) {
 			Actor actor = tileGame.getGrid().get(adjacentLocation);
 
 			if (actor == null) {
@@ -154,20 +155,5 @@ public class Environment extends Agent {
 			msg.setContent("moveto:" + action);
 			send(msg);
 		}
-	}
-
-	private boolean isValid(int action, Location adjacentLocation) {
-		boolean valid = false;
-
-		valid = tileGame.getGrid().isValid(adjacentLocation);
-		if (valid) {
-			Actor actor = tileGame.getGrid().get(adjacentLocation);
-			if (actor != null
-					&& (actor.getClass() == Rock.class || actor.getClass() == Critter.class)) {
-				valid = false;
-			}
-		}
-
-		return valid;
 	}
 }
