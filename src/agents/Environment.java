@@ -127,6 +127,8 @@ public class Environment extends Agent {
 		boolean valid = false;
 		
 		valid = tileGame.getGrid().isValid(adjacentLocation);
+		if (tileGame.getGrid().get(adjacentLocation) != null) 
+			valid = false;
 				
 		return valid;
 	}
