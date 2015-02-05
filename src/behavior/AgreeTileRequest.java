@@ -26,7 +26,7 @@ public class AgreeTileRequest extends SimpleBehaviour{
 	}
 	
 	public int onEnd() {
-		return TileAgentStates.GAME_OVER_EVENT;
+		return TileAgentStates.PLAYING_EVENT;
 	}
 
 	@Override

@@ -35,15 +35,22 @@ public class TileGame extends World<Actor> {
 	private Environment env;
 	public TileGame(Environment env) {
 		this.env = env;
-		Actor actors[] = {new Flower(Color.RED), new Critter(), new Rock()};
+		Actor actors[] = {new Flower(Color.RED),  new Rock(), new Critter()};
 		int num_available_spaces = 98;
 		int amount;
 		
-		for (int i = 0; i< 3; i++) {
-			amount = (int)(new Random().nextDouble() * (num_available_spaces / 6.0)) + 1;
-			num_available_spaces -= amount;
-			for (int j = 0; j < amount; j++)
-				add(getRandomEmptyLocation(), actors[i]);
+		amount = (int)(new Random().nextDouble() * (num_available_spaces / 6.0)) + 1;
+		
+		for (int j = 0; j < amount; j++) {
+			add(getRandomEmptyLocation(), actors[0]);
+			add(getRandomEmptyLocation(), actors[1]);
+		}
+		
+		num_available_spaces -= (amount * 2);		
+		amount = (int)(new Random().nextDouble() * (num_available_spaces / 6.0)) + 1;
+		
+		for (int j = 0; j < amount; j++) {
+			add(getRandomEmptyLocation(), actors[2]);
 		}
 	}
 	
@@ -73,8 +80,10 @@ public class TileGame extends World<Actor> {
 	}
 	
 	public void step() {
-		for (BugAgent agent :env.getMap().values())
+		for (Location location :env.getMap().values()) {
+			BugAgent agent = (BugAgent)this.getGrid().get(location);
 			agent.act();
+		}
 		
 	}
 }

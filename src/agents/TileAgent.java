@@ -5,6 +5,7 @@ import behavior.ConfirmExistence;
 import behavior.GameOver;
 import behavior.InformExistence;
 import behavior.InternalStateBehavior;
+import behavior.PlayingBehavior;
 import behavior.RequestTile;
 import behavior.TileAgentStates;
 import jade.core.AID;
@@ -22,6 +23,7 @@ public class TileAgent extends Agent {
 	private ConfirmExistence confirmExistence;
 	private RequestTile requestTile;
 	private AgreeTileRequest agreeTileRequest;
+	private PlayingBehavior playingBehavior;
 	private GameOver gameOver;
 	
 	public TileAgent() {
@@ -30,6 +32,7 @@ public class TileAgent extends Agent {
 		confirmExistence = new ConfirmExistence();
 		requestTile = new RequestTile();
 		agreeTileRequest = new AgreeTileRequest();
+		playingBehavior = new PlayingBehavior();
 		gameOver = new GameOver();
 	}
 
@@ -41,6 +44,7 @@ public class TileAgent extends Agent {
 		internalState.registerState(confirmExistence, TileAgentStates.CONFIRM_EXISTENCE);
 		internalState.registerState(requestTile, TileAgentStates.REQUEST_TILE);
 		internalState.registerState(agreeTileRequest, TileAgentStates.AGREE_TILE_REQUEST);
+		internalState.registerState(playingBehavior, TileAgentStates.PLAYING);
 		
 		internalState.registerTransition(
 				TileAgentStates.INFORM_EXISTENCE,
@@ -59,6 +63,17 @@ public class TileAgent extends Agent {
 		
 		internalState.registerTransition(
 				TileAgentStates.AGREE_TILE_REQUEST,
+				TileAgentStates.PLAYING,
+				TileAgentStates.PLAYING_EVENT);
+		
+		internalState.registerTransition(
+				TileAgentStates.PLAYING,
+				TileAgentStates.PLAYING,
+				TileAgentStates.PLAYING_EVENT);
+		
+		
+		internalState.registerTransition(
+				TileAgentStates.PLAYING,
 				TileAgentStates.GAME_OVER,
 				TileAgentStates.GAME_OVER_EVENT);
 		
