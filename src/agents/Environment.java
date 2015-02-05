@@ -69,8 +69,8 @@ public class Environment extends Agent {
 						if (content.equals("random")) {
 							Location location = map.get(agentName);
 							if (location != null) {
-								int action = (int) (new Random().nextDouble()
-										* AgentAction.MOVE_SOUTH + 1);
+								int action = ((int) (new Random().nextDouble()
+										* (AgentAction.MOVE_SOUTH + 1)));
 								executeAction(action, location);
 							}
 						}
@@ -106,15 +106,28 @@ public class Environment extends Agent {
 			adjacentLocation = location.getAdjacentLocation(Location.SOUTH);
 		}
 		
-		if(adjacentLocation != null && tileGame.getGrid().isValid(adjacentLocation)) {
+		if(adjacentLocation != null && isValid(adjacentLocation)) {
 			tileGame.remove(location);			
 			tileGame.add(adjacentLocation, bugAgent);
-			map.put(bugAgent.getAgentName(), adjacentLocation);			
+			map.put(bugAgent.getAgentName(), adjacentLocation);
+			
+			ACLMessage msg = new ACLMessage(ACLMessage.CONFIRM);
+			msg.addReceiver(new AID(bugAgent.getAgentName(), AID.ISLOCALNAME));
+			msg.setContent("moveto:" + action);
+			send(msg);			
 		} else {
 			ACLMessage msg = new ACLMessage(ACLMessage.FAILURE);
-			msg.addReceiver(new AID(((BugAgent)(bugAgent)).getAgentName(), AID.ISLOCALNAME));
+			msg.addReceiver(new AID(bugAgent.getAgentName(), AID.ISLOCALNAME));
 			msg.setContent("moveto:" + action);
 			send(msg);			
 		}
+	}
+	
+	private boolean isValid(Location adjacentLocation) {
+		boolean valid = false;
+		
+		valid = tileGame.getGrid().isValid(adjacentLocation);
+				
+		return valid;
 	}
 }
