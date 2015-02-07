@@ -1,5 +1,7 @@
 package agents;
 
+import java.awt.Color;
+
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import info.gridworld.actor.Bug;
@@ -11,6 +13,9 @@ public class BugAgent extends Bug{
 	
 	public BugAgent(String agentName, Environment env) {
 		super();
+		if(agentName.contains("util")) {
+			this.setColor(Color.BLUE);
+		}
 		this.setAgentName(agentName);
 		this.setEnv(env);
 		System.out.println("AgentName " + agentName);

@@ -115,7 +115,16 @@ public class Environment extends Agent {
 
 						if (content.equals("random")) {							
 							if (location != null) {
-								int action = ((int) (new Random().nextDouble() * (AgentAction.MOVE_SOUTH + 1)));
+								int action = ((int) (new Random().nextDouble() * (4)));
+								if(action > 3) {
+									action = AgentAction.MOVE_SOUTH;
+								} else if(action > 2) {
+									action = AgentAction.MOVE_NORTH;
+								} else if(action > 1) {
+									action = AgentAction.MOVE_RIGHT;
+								} else {
+									action = AgentAction.MOVE_LEFT;
+								}
 								executeAction(action, location);
 							}
 						} else if(content.contains("action")) {

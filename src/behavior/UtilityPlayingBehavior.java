@@ -28,17 +28,19 @@ public class UtilityPlayingBehavior extends PlayingBehavior {
 	Location flowerLocation = null;
 	Location centrLocation = new Location(5, 5);
 	String goal = "center";
+	int failures = 0;
+	boolean randomize = false;
 	LinkedList<String> nextActionsList = new LinkedList<String>();
 	private HashMap<Integer, Double> probabiltyMap;
 
 	public UtilityPlayingBehavior() {
 		super();
-		 probabiltyMap = new HashMap<Integer, Double>();
-		 
-		 probabiltyMap.put(AgentAction.MOVE_LEFT, 0.25);
-		 probabiltyMap.put(AgentAction.MOVE_RIGHT, 0.25);
-		 probabiltyMap.put(AgentAction.MOVE_NORTH, 0.25);
-		 probabiltyMap.put(AgentAction.MOVE_SOUTH, 0.25);		 
+		probabiltyMap = new HashMap<Integer, Double>();
+
+		probabiltyMap.put(AgentAction.MOVE_LEFT, 0.25);
+		probabiltyMap.put(AgentAction.MOVE_RIGHT, 0.25);
+		probabiltyMap.put(AgentAction.MOVE_NORTH, 0.25);
+		probabiltyMap.put(AgentAction.MOVE_SOUTH, 0.25);
 	}
 
 	public String calculateUtility() {
@@ -65,7 +67,7 @@ public class UtilityPlayingBehavior extends PlayingBehavior {
 			}
 
 			if (flowerLocation != null && rockLocation != null) {
-				goal = "center";
+				goal = "fillholes";
 			} else {
 				goal = "center";
 			}
@@ -80,87 +82,78 @@ public class UtilityPlayingBehavior extends PlayingBehavior {
 
 				if (nextCol == goalCol) {
 					if (nextRow > goalRow) {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_SOUTH);
+						currentGoalUtility /= probabiltyMap
+								.get(AgentAction.MOVE_SOUTH);
 					} else {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_NORTH);						
+						currentGoalUtility /= probabiltyMap
+								.get(AgentAction.MOVE_NORTH);
 					}
 				} else if (nextCol > goalCol) {
-					if (nextRow > goalRow) {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_SOUTH);
-					} else {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_NORTH);
-					}					
+					currentGoalUtility /= probabiltyMap
+							.get(AgentAction.MOVE_RIGHT);
 				} else {
-					if (nextRow > goalRow) {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_SOUTH);
-					} else {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_NORTH);
-					}
+					currentGoalUtility /= probabiltyMap
+							.get(AgentAction.MOVE_LEFT);
 				}
-				
+
 				if (currentGoalUtility < goalUtility) {
 					goalUtility = currentGoalUtility;
 					nextAction = location;
 				}
-
 			} else {
 				double currentGoalUtility;
-				goalCol = centrLocation.getCol();
-				goalRow = centrLocation.getRow();
+				goalCol = flowerLocation.getCol();
+				goalRow = flowerLocation.getRow();
 
 				currentGoalUtility = Math.abs((goalRow - nextRow)
 						+ (goalCol - nextCol));
 
 				if (nextCol == goalCol) {
 					if (nextRow > goalRow) {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_SOUTH);
+						currentGoalUtility /= probabiltyMap
+								.get(AgentAction.MOVE_SOUTH);
 					} else {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_NORTH);						
+						currentGoalUtility /= probabiltyMap
+								.get(AgentAction.MOVE_NORTH);
 					}
 				} else if (nextCol > goalCol) {
-					if (nextRow > goalRow) {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_SOUTH);
-					} else {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_NORTH);
-					}					
+					currentGoalUtility /= probabiltyMap
+							.get(AgentAction.MOVE_RIGHT);
 				} else {
-					if (nextRow > goalRow) {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_SOUTH);
-					} else {
-						currentGoalUtility /=  probabiltyMap.get(AgentAction.MOVE_NORTH);
-					}
+					currentGoalUtility /= probabiltyMap
+							.get(AgentAction.MOVE_LEFT);
 				}
-				
-				if (currentGoalUtility < goalUtility) {
+
+				if (Math.abs(currentGoalUtility) < goalUtility) {
 					goalUtility = currentGoalUtility;
 					nextAction = location;
 				}
 			}
 		}
 
-		if (nextAction != null) {			
+		if (nextAction != null) {
 			nextActionMessage += "action:";
 			System.out.println("My next locations is " + nextAction);
 			if (nextAction.getCol() == currentLocation.getCol()) {
 				if (nextAction.getRow() > currentLocation.getRow()) {
-					nextActionMessage +=  AgentAction.MOVE_SOUTH;
+					nextActionMessage += AgentAction.MOVE_SOUTH;
 				} else {
 					nextActionMessage += AgentAction.MOVE_NORTH;
 				}
 			} else if (nextAction.getCol() > currentLocation.getCol()) {
+				nextActionMessage += AgentAction.MOVE_RIGHT + ",";
 				if (nextAction.getRow() > currentLocation.getRow()) {
 					nextActionMessage += AgentAction.MOVE_SOUTH;
 				} else {
 					nextActionMessage += AgentAction.MOVE_NORTH;
 				}
-				nextActionMessage += "," + AgentAction.MOVE_RIGHT;
 			} else {
+				nextActionMessage += AgentAction.MOVE_LEFT + ",";
 				if (nextAction.getRow() > currentLocation.getRow()) {
 					nextActionMessage += AgentAction.MOVE_SOUTH;
 				} else {
-					nextActionMessage +=  AgentAction.MOVE_NORTH;
+					nextActionMessage += AgentAction.MOVE_NORTH;
 				}
-				nextActionMessage += "," + AgentAction.MOVE_LEFT;
 			}
 			System.out.println("My next action is " + nextActionMessage);
 		}
@@ -251,27 +244,41 @@ public class UtilityPlayingBehavior extends PlayingBehavior {
 			if (state == PlayingStates.IDLE) {
 				state = PlayingStates.EXPLORING;
 			} else if (state == PlayingStates.EXPLORING) {
-				ACLMessage msgTx = msgRx.createReply();
-				String contentString = msgRx.getContent();
-				currentLocation = new Location(Integer.parseInt(contentString
-						.split(":")[1]), Integer.parseInt(contentString
-						.split(":")[2]));
 
-				System.out.println("I am at (" + currentLocation.getRow()
-						+ ", " + currentLocation.getCol() + ")");
-				msgTx.setContent("request:around");
-				msgTx.setPerformative(ACLMessage.REQUEST);
-				myAgent.send(msgTx);
-			} else if (state == PlayingStates.PLANNING) {
-				String nextActions[] = utility(environmentState).split(":")[1].split(",");
+				if(failures > 10)
+					randomize = true;
 				
-				for(String nextAction: nextActions) {
+				if (randomize) {
+					failures--;
+					if(failures==0)
+						randomize = false;
+					ACLMessage msgTx = msgRx.createReply();
+					msgTx.setContent("random");
+					msgTx.setPerformative(ACLMessage.PROPOSE);
+					myAgent.send(msgTx);
+				} else {
+					ACLMessage msgTx = msgRx.createReply();
+					String contentString = msgRx.getContent();
+					currentLocation = new Location(
+							Integer.parseInt(contentString.split(":")[1]),
+							Integer.parseInt(contentString.split(":")[2]));
+
+					System.out.println("I am at (" + currentLocation.getRow()
+							+ ", " + currentLocation.getCol() + ")");
+					msgTx.setContent("request:around");
+					msgTx.setPerformative(ACLMessage.REQUEST);
+					myAgent.send(msgTx);
+				}
+			} else if (state == PlayingStates.PLANNING) {
+				String nextActions[] = utility(environmentState).split(":")[1]
+						.split(",");
+
+				for (String nextAction : nextActions) {
 					nextActionsList.addFirst(nextAction);
-				}				
+				}
 				state = PlayingStates.MOVING;
 			} else if (state == PlayingStates.MOVING) {
-				
-				if(nextActionsList.isEmpty()) {
+				if (nextActionsList.isEmpty()) {
 					state = PlayingStates.EXPLORING;
 				} else {
 					ACLMessage msgTx = msgRx.createReply();
@@ -288,25 +295,31 @@ public class UtilityPlayingBehavior extends PlayingBehavior {
 				state = PlayingStates.PLANNING;
 			}
 		} else if (msgRx.getPerformative() == ACLMessage.FAILURE) {
+			
+			if(!randomize)
+				failures++;
 			String content = msgRx.getContent();
 			String action = content.split(":")[0];
 
 			if (action.equals("moveto")) {
+				System.out.println("This is the content " + content);
 				int direction = Integer.parseInt(content.split(":")[1]);
 				double probability = probabiltyMap.get(direction);
-				probabiltyMap.put(direction, probability - 0.08);
+				probabiltyMap.put(direction, probability - 0.1);
 				System.out.println("Direction (" + direction + ") failed");
-				
-				probability = probabiltyMap.get(AgentAction.MOVE_LEFT);				
-				probabiltyMap.put(AgentAction.MOVE_LEFT, probability + 0.02);
-				probability = probabiltyMap.get(AgentAction.MOVE_RIGHT);				
-				probabiltyMap.put(AgentAction.MOVE_RIGHT, probability + 0.02);
-				probability = probabiltyMap.get(AgentAction.MOVE_NORTH);				
-				probabiltyMap.put(AgentAction.MOVE_NORTH, probability + 0.02);
-				probability = probabiltyMap.get(AgentAction.MOVE_SOUTH);				
-				probabiltyMap.put(AgentAction.MOVE_SOUTH, probability + 0.02);
-				
-				state = PlayingStates.IDLE;
+
+				probability = probabiltyMap.get(AgentAction.MOVE_LEFT);
+				probabiltyMap.put(AgentAction.MOVE_LEFT, probability + 0.025);
+				probability = probabiltyMap.get(AgentAction.MOVE_RIGHT);
+				probabiltyMap.put(AgentAction.MOVE_RIGHT, probability + 0.025);
+				probability = probabiltyMap.get(AgentAction.MOVE_NORTH);
+				probabiltyMap.put(AgentAction.MOVE_NORTH, probability + 0.025);
+				probability = probabiltyMap.get(AgentAction.MOVE_SOUTH);
+				probabiltyMap.put(AgentAction.MOVE_SOUTH, probability + 0.025);
+
+				for (Integer key : probabiltyMap.keySet()) {
+					System.out.println("Maps " + probabiltyMap.get(key));
+				}
 			}
 		} else if (msgRx.getPerformative() == ACLMessage.CONFIRM) {
 			String content = msgRx.getContent();
@@ -316,19 +329,16 @@ public class UtilityPlayingBehavior extends PlayingBehavior {
 				int direction = Integer.parseInt(content.split(":")[1]);
 				System.out.println("Direction (" + direction + ") succeded");
 				double probability = probabiltyMap.get(direction);
-				probabiltyMap.put(direction, probability + 0.04);
-				
+				probabiltyMap.put(direction, probability + 0.1);
 
-				probability = probabiltyMap.get(AgentAction.MOVE_LEFT);				
-				probabiltyMap.put(AgentAction.MOVE_LEFT, probability - 0.01);
-				probability = probabiltyMap.get(AgentAction.MOVE_RIGHT);				
-				probabiltyMap.put(AgentAction.MOVE_RIGHT, probability - 0.01);
-				probability = probabiltyMap.get(AgentAction.MOVE_NORTH);				
-				probabiltyMap.put(AgentAction.MOVE_NORTH, probability - 0.01);
-				probability = probabiltyMap.get(AgentAction.MOVE_SOUTH);				
-				probabiltyMap.put(AgentAction.MOVE_SOUTH, probability - 0.01);
-				
-				state = PlayingStates.IDLE;
+				probability = probabiltyMap.get(AgentAction.MOVE_LEFT);
+				probabiltyMap.put(AgentAction.MOVE_LEFT, probability - 0.025);
+				probability = probabiltyMap.get(AgentAction.MOVE_RIGHT);
+				probabiltyMap.put(AgentAction.MOVE_RIGHT, probability - 0.025);
+				probability = probabiltyMap.get(AgentAction.MOVE_NORTH);
+				probabiltyMap.put(AgentAction.MOVE_NORTH, probability - 0.025);
+				probability = probabiltyMap.get(AgentAction.MOVE_SOUTH);
+				probabiltyMap.put(AgentAction.MOVE_SOUTH, probability - 0.025);
 			}
 		}
 	}
