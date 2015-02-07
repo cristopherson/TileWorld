@@ -3,6 +3,7 @@ package agents;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import info.gridworld.actor.Bug;
+import info.gridworld.grid.Location;
 
 public class BugAgent extends Bug{
 	private String agentName;
@@ -16,9 +17,11 @@ public class BugAgent extends Bug{
 	}
 	
 	public void act() {		
+		Location location = env.getMap().get(agentName);		
 		ACLMessage msg = new ACLMessage(ACLMessage.CFP);
-		msg.addReceiver(new AID(agentName, AID.ISLOCALNAME));
-		msg.setContent("action");
+		
+		msg.addReceiver(new AID(agentName, AID.ISLOCALNAME));		
+		msg.setContent("position:"+location.getCol()+":"+location.getRow());
 		env.send(msg); 
 	}
 

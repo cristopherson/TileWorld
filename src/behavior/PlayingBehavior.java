@@ -37,12 +37,12 @@ public class PlayingBehavior extends SimpleBehaviour {
 				msgTx.setPerformative(ACLMessage.PROPOSE);
 				myAgent.send(msgTx);				
 			} else if (state == PlayingStates.PLANNING) {
-				state = PlayingStates.FILLING_HOLES;
+				state = PlayingStates.MOVING;
 				ACLMessage msgTx = msgRx.createReply();
 				msgTx.setContent("random");
 				msgTx.setPerformative(ACLMessage.PROPOSE);
 				myAgent.send(msgTx);				
-			} else if (state == PlayingStates.FILLING_HOLES) {
+			} else if (state == PlayingStates.MOVING) {
 				state = PlayingStates.IDLE;
 				ACLMessage msgTx = msgRx.createReply();
 				msgTx.setContent("random");

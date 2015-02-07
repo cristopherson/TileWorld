@@ -10,6 +10,7 @@ import behavior.PlayingBehavior;
 import behavior.RandomPlayingBehavior;
 import behavior.RequestTile;
 import behavior.TileAgentStates;
+import behavior.UtilityPlayingBehavior;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
@@ -53,6 +54,9 @@ public class TileAgent extends Agent {
 			} else if(args[0].equals("lazy")){
 				System.out.println("I am a lazy agent");
 				playingBehavior = new LazyPlayingBehavior();
+			} else if(args[0].equals("utility")){
+				System.out.println("I am a utility agent");
+				playingBehavior = new UtilityPlayingBehavior();
 			}
 		}
 

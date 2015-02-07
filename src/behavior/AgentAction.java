@@ -1,8 +1,10 @@
 package behavior;
 
+import info.gridworld.grid.Location;
+
 public interface AgentAction {
-	public static int MOVE_LEFT = 0;
-	public static int MOVE_RIGHT = 1;
-	public static int MOVE_NORTH = 2;
-	public static int MOVE_SOUTH = 3;
+	public static int MOVE_LEFT = Location.LEFT;
+	public static int MOVE_RIGHT = Location.RIGHT;
+	public static int MOVE_NORTH = Location.NORTH;
+	public static int MOVE_SOUTH = Location.SOUTH;
 }

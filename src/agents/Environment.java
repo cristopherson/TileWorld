@@ -7,6 +7,7 @@ import info.gridworld.actor.Flower;
 import info.gridworld.actor.Rock;
 import info.gridworld.grid.Location;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -52,29 +53,76 @@ public class Environment extends Agent {
 						send(msgTx);
 					} else if (msgRx.getPerformative() == ACLMessage.REQUEST) {
 						System.out.println(msgRx);
-						BugAgent bugAgent = new BugAgent(msgRx.getSender()
-								.getLocalName().toString(),
-								(Environment) myAgent);
-						Location randomLocation = tileGame
-								.getRandomEmptyLocation();
-						tileGame.add(randomLocation, bugAgent);
+						String content = msgRx.getContent();
 
-						getMap().put(bugAgent.getAgentName(), randomLocation);
+						if (content.split(":").length != 1) {
+							String requestType = content.split(":")[1];
+							
+							if(requestType.equals("around")) {
+								String agentName = msgRx.getSender().getLocalName();
+								Location agentLocation = getMap().get(agentName);
+								ArrayList<Location> occupiedLocations = tileGame.getGrid().getOccupiedAdjacentLocations(agentLocation);
+								ArrayList<Location> availableLocations = tileGame.getGrid().getEmptyAdjacentLocations(agentLocation);							
+								String message = "response:actors:";
+								
+								for(Location occupied : occupiedLocations) {
+									Actor actor = tileGame.getGrid().get(occupied);
+									if(actor.getClass() == Rock.class) {
+										message += "rock,";
+									} else if(actor.getClass() == Flower.class) {
+										message += "flower,";
+									} else if(actor.getClass() == Critter.class) {
+										message += "critter,";
+									} else {
+										message += "unknown,";
+									}
+									
+									message+=occupied.getRow()+ "," + occupied.getCol() + ":";
+								}
+								
+								message +="empty:";
+							
+								for (Location location : availableLocations) {
+									message+=location.getRow()+ "," + location.getCol() + ":";
+								}
+								message += "end";
+								ACLMessage msgTx = msgRx.createReply();
+								msgTx.setPerformative(ACLMessage.INFORM);
+								msgTx.setContent(message);
+								send(msgTx);								
+							}
+						} else {
+							BugAgent bugAgent = new BugAgent(msgRx.getSender()
+									.getLocalName().toString(),
+									(Environment) myAgent);
+							Location randomLocation = tileGame
+									.getRandomEmptyLocation();
+							tileGame.add(randomLocation, bugAgent);
 
-						ACLMessage msgTx = msgRx.createReply();
-						msgTx.setPerformative(ACLMessage.AGREE);
-						msgTx.setContent("Agent " + bugAgent.getAgentName()
-								+ " has a place in this world");
-						send(msgTx);
+							getMap().put(bugAgent.getAgentName(),
+									randomLocation);
+
+							ACLMessage msgTx = msgRx.createReply();
+							msgTx.setPerformative(ACLMessage.AGREE);
+							msgTx.setContent("Agent " + bugAgent.getAgentName()
+									+ " has a place in this world");
+							send(msgTx);
+						}
 					} else if (msgRx.getPerformative() == ACLMessage.PROPOSE) {
 						String content = msgRx.getContent();
 						String agentName = msgRx.getSender().getLocalName();
+						Location location = map.get(agentName);
 
-						if (content.equals("random")) {
-							Location location = map.get(agentName);
+						if (content.equals("random")) {							
 							if (location != null) {
 								int action = ((int) (new Random().nextDouble() * (AgentAction.MOVE_SOUTH + 1)));
 								executeAction(action, location);
+							}
+						} else if(content.contains("action")) {
+							if (location != null) {
+								String nextAction = content.split(":")[1];
+								executeAction(Integer.parseInt(nextAction), location);
+								
 							}
 						}
 					}
@@ -112,7 +160,8 @@ public class Environment extends Agent {
 
 		adjacentLocation = location.getAdjacentLocation(action);
 
-		if (adjacentLocation != null && tileGame.getGrid().isValid(adjacentLocation)) {
+		if (adjacentLocation != null
+				&& tileGame.getGrid().isValid(adjacentLocation)) {
 			Actor actor = tileGame.getGrid().get(adjacentLocation);
 
 			if (actor == null) {
